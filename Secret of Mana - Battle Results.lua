@@ -2,6 +2,7 @@
 sLuc = " Luc"
 sLevelUp = " LEVEL UP!"
 sLevelNew = " Reaches Lv. {0}!"
+sLeft = " Left"
 
 lastexp = {-1,-1,-1}
 newexp = {0,0,0}
@@ -15,7 +16,7 @@ duration2 = 0
 opacity = 0
 
 menu_x = 10
-menu_y = 76
+menu_y = 160
 
 tbl={}
 tbl[0x81]="a"
@@ -136,7 +137,7 @@ function printExpGain()
   
   -- EXPERIENCE
   for i = 0,2 do
-  	name = ReadString(0xCC00 + (i*0xC),6)
+      name = ReadString(0xCC00 + (i*0xC),6)
   	val = emu.readWord(0xE18D + (i*0x200),emu.memType.snesWorkRam) + (emu.read(0xE18F + (i*0x200),emu.memType.snesWorkRam) << 0x10)
   	val2 = emu.readWord(0xE17D + (i*0x200),emu.memType.snesWorkRam) + (emu.read(0xE17F + (i*0x200),emu.memType.snesWorkRam) << 0x10)
 
@@ -147,7 +148,7 @@ function printExpGain()
   	  newexp[i+1] = 0
   	  goto continue
   	end
- 	
+
   	if lastexp[i+1] ~= val and lastexp[i+1] > 0 then
   	  newexp[i+1] = val - lastexp[i+1] 
         if newexp[i+1] > 0 then
@@ -156,7 +157,7 @@ function printExpGain()
           duration1 = 100
           duration2 = 100
           opacity = 255
-          strexp[i+1] = "+" .. newexp[i+1]
+          strexp[i+1] = "+" .. newexp[i+1] .. sExp
           lastexp[i+1]=val
         else
           lvup[i+1] = false
@@ -165,7 +166,7 @@ function printExpGain()
         end
       elseif duration1 == 0 then
         if newexp[i+1] > 0 then
- 		 strexp[i+1] = lastexp[i+1]
+ 		 strexp[i+1] = nextlv[i+1] - lastexp[i+1] .. sLeft
           lastexp[i+1] = val
         end
   	end
@@ -176,14 +177,11 @@ function printExpGain()
         goto continue
       end
       if strexp[i+1] ~= "" then
-        text = name .. " " ..  strexp[i+1] .. sExp
+        text = name .. " " ..  strexp[i+1]
         if lvup[i+1] then
           nextlv[i+1] = val2
           if duration1 > 0 then
             text = text .. sLevelUp
-          else
-            level = emu.read(0xE181 + (i*0x200),emu.memType.snesWorkRam) + 1
-            text = text .. string.gsub(sLevelNew, "%{0}", level)
           end
         end
   	  drawText(menu_x,menu_y + (cnt * 10),text,0xFFFFFF,0x000000,0xFF000000,opacity)
